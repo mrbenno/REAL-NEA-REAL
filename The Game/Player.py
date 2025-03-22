@@ -60,4 +60,4 @@ class Player:
         for tile in world:
             if tile[1].colliderect(self.rect.x, self.rect.y + deltaY, self.rect.width, self.rect.height):
                 if self.velocity[1] < 0:
-                    
+                    deltaY = tile[1].bottem - self
