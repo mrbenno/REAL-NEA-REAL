@@ -43,7 +43,7 @@ def main():
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     ]
 
-    player1 = Player(pygame.Rect(100, ((dimensions[1] - tileSize) - 25), 25, 25), '#0A9B9A', 5, 0, 0, False, False, 8)
+    player1 = Player(pygame.Rect(100, 100, 25, 25), '#0A9B9A', 7.5, False, False, 8)
     world = World(data)
     tileList = (world.buildWorld(tileSize=30))
 
@@ -54,7 +54,7 @@ def main():
         handleEvents()
 
         player1.checkInput()
-        player1.checkCollisions(world.tileList, player1.velocity[0], player1.velocity[1])
+        #player1.checkCollisions(world.tileList, player1.velocity[0], player1.velocity[1])
         drawGrid(screen, dimensions[0], dimensions[1], tileSize)
         world.draw(screen)
         player1.update(world.tileList)
