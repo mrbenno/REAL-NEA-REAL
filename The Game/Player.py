@@ -27,7 +27,7 @@ class Player:
         deltaX = self.velocity[0]
         deltaY = self.velocity[1]
 
-        #self.checkCollisions(tileList, deltaY, deltaX)
+        self.checkCollisions(tileList, deltaY, deltaX)
 
         self.rect.x += deltaX
         self.rect.y += deltaY
@@ -56,51 +56,51 @@ class Player:
                     negative = -1 #player will fall down
                 jumpSize = (self.jumpCount ** 2) * 0.25 * negative
                 self.rect.y -= jumpSize #changing the player's y position
-                """ newScale -= (self.jumpCount ** 2) * 0.025 * negative #changing the player's shape
-                self.rect.x -= (self.rect.width - newScale) * 0.5
-                self.rect.width   -= (self.jumpCount ** 2) * 0.025 * negative
-                self.rect.height  += (self.jumpCount ** 2) * 0.025 * negative """
+                # newScale -= (self.jumpCount ** 2) * 0.025 * negative #changing the player's shape
+                # self.rect.x -= (self.rect.width - newScale) * 0.5
+                # self.rect.width   -= (self.jumpCount ** 2) * 0.025 * negative
+                # self.rect.height  += (self.jumpCount ** 2) * 0.025 * negative
                 self.jumpCount -= 0.5 
             else:
                 self.isJumping = False
                 self.jumpCount = 8
 
-    # GPT-assisted code, doesn't work at all.
     def checkCollisions(self, tileList, deltaX, deltaY):
         self.onGround = False
 
-        for tile in tileList:
+        for tile in tileList:         
             if pygame.Rect.colliderect(tile, self.rect):
-                print("collided")
-
-                if deltaX < 0: #moving left
-                    self.rect.left = tile.right
-                    self.velocity[0] = 0
-
-                if deltaX > 0: #moving right
-                    self.rect.right = tile.left
-                    self.velocity[0] = 0
-
-                if deltaY < 0: #jumping upwards / platform above
-                    self.rect.top = tile.bottom
-                    self.velocity[1] = 0
-                elif deltaY > 0: #falling down / ground below
-                    self.rect.bottom # tile.top
-                    self.velocity[1] = 0
-                    self.onGround = True      
-
-        if not self.onGround == True:
-            self.velocity[1] += 0.05
-"""
+                print("collided")            
                 #checks if below ground/jumping
                 if self.velocity[1] < 0:
-                    y = tile.bottom - self.rect.top
+                    deltaY = tile.bottom - self.rect.top
                     self.velocity[1] = 0
-                    self.animate(0, y)
+                    self.animate(0, deltaY)
 
-                #checks if above ground/falling
+                    #checks if above ground/falling
                 if self.velocity[1] >= 0:
-                    y = tile.top - self.rect.bottom
+                    deltaY = tile.top - self.rect.bottom
                     self.velocity[1] = 0
-                    self.animate(0, y) "
-"""
+                    self.animate(0, deltaY) 
+
+        #     if pygame.Rect.colliderect(tile, self.rect):
+        #         print("collided")
+
+        #         if deltaX < 0: #moving left
+        #             self.rect.left = tile.right
+        #             self.velocity[0] = 0
+
+        #         if deltaX > 0: #moving right
+        #             self.rect.right = tile.left
+        #             self.velocity[0] = 0
+
+        #         if deltaY < 0: #jumping upwards / platform above
+        #             self.rect.top = tile.bottom
+        #             self.velocity[1] = 0
+        #         elif deltaY > 0: #falling down / ground below
+        #             self.rect.bottom # tile.top
+        #             self.velocity[1] = 0
+        #             self.onGround = True      
+
+        # if not self.onGround == True:
+        #     self.velocity[1] += 0.05
