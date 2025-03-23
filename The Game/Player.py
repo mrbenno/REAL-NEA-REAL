@@ -2,10 +2,12 @@ import pygame
 
 class Player:
     #constructer
-    def __init__(self, rect, colour, speed, isJumping, onGround, jumpCount):
+    def __init__(self, rect, colour, speed, deltaX, deltaY, isJumping, onGround, jumpCount):
         self.rect = rect
         self.colour = colour
         self.velocity = [0, 0]
+        self.deltaX = 1
+        self.deltaY = 1
         self.speed = speed
         self.isJumping = isJumping
         self.onGround = onGround
@@ -20,22 +22,29 @@ class Player:
     def draw(self, screen):
         pygame.draw.rect(screen, (self.colour), self.rect)
 
-    def update(self):
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
+    #GPT-assisted code, works as expected, although improvements may be made.
+    def update(self, tileList):
+        deltaX = self.velocity[0]
+        deltaY = self.velocity[1]
+
+        #self.checkCollisions(tileList, deltaY, deltaX)
+
+        self.rect.x += deltaX
+        self.rect.y += deltaY
+
         self.velocity[0] *= 0.1
-        self.velocity[1] *= 0.1
+        self.velocity[1] *= 0.98
 
-        #self.rect.move_by(...)
+    #self.rect.move_by(...)
 
-    def checkInput(self, speed):
+    def checkInput(self):
         keys = pygame.key.get_pressed()
         
         #left and right always active, no restraints
         if keys[pygame.K_a]: #moving left   
-            self.animate(-speed, 0)    
+            self.animate(-self.speed, 0)    
         if keys[pygame.K_d]: #moving right
-            self.animate(speed, 0)
+            self.animate(self.speed, 0)
         
         if self.isJumping == False: #must be here otherwise would jump infinitly
             if keys[pygame.K_SPACE]: # jumping
@@ -56,8 +65,42 @@ class Player:
                 self.isJumping = False
                 self.jumpCount = 8
 
-    def checkCollisions(self, world, deltaY, deltaX):
-        for tile in world:
-            if tile[1].colliderect(self.rect.x, self.rect.y + deltaY, self.rect.width, self.rect.height):
+    # GPT-assisted code, doesn't work at all.
+    def checkCollisions(self, tileList, deltaX, deltaY):
+        self.onGround = False
+
+        for tile in tileList:
+            if pygame.Rect.colliderect(tile, self.rect):
+                print("collided")
+
+                if deltaX < 0: #moving left
+                    self.rect.left = tile.right
+                    self.velocity[0] = 0
+
+                if deltaX > 0: #moving right
+                    self.rect.right = tile.left
+                    self.velocity[0] = 0
+
+                if deltaY < 0: #jumping upwards / platform above
+                    self.rect.top = tile.bottom
+                    self.velocity[1] = 0
+                elif deltaY > 0: #falling down / ground below
+                    self.rect.bottom # tile.top
+                    self.velocity[1] = 0
+                    self.onGround = True      
+
+        if not self.onGround == True:
+            self.velocity[1] += 0.05
+"""
+                #checks if below ground/jumping
                 if self.velocity[1] < 0:
-                    deltaY = tile[1].bottem - self
+                    y = tile.bottom - self.rect.top
+                    self.velocity[1] = 0
+                    self.animate(0, y)
+
+                #checks if above ground/falling
+                if self.velocity[1] >= 0:
+                    y = tile.top - self.rect.bottom
+                    self.velocity[1] = 0
+                    self.animate(0, y) "
+"""
