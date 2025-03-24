@@ -13,6 +13,11 @@ class Player:
         self.isJumping = isJumping
         self.onGround = onGround
         self.jumpCount = jumpCount
+        self.tileList = []
+        self.isDead = False
+
+    def updateTileList(self, new):
+        self.tileList = new
 
     # function which animates player
     def animate(self, x, y):
@@ -23,16 +28,22 @@ class Player:
     def draw(self, screen):
         pygame.draw.rect(screen, (self.colour), self.rect)
 
-    def update(self, tileList):
-        for i in range(10):
-            self.checkCollisions(tileList)
+    def update(self):
+        for i in range(1):
+            self.checkCollisions()
 
-        self.velocity[1] += 0.5
+        self.velocity[1] += 0.6
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]
 
         self.velocity[0] *= 0.1
-        self.velocity[1] *= 0.98
+        self.velocity[1] += 0.0
+
+    def checkIfDead(self, height):
+        if self.rect.y > height:
+            self.rect.x, self.rect.y = 100, 100
+            deathSFX = pygame.mixer.Sound("Sounds/Death.wav")
+            deathSFX.play()
 
     #self.rect.move_by(...)
 
@@ -41,72 +52,35 @@ class Player:
         
         #left and right always active, no restraints
         if keys[pygame.K_a]: #moving left   
-            self.animate(-self.speed, 0)    
+            self.velocity[0] = -10
         if keys[pygame.K_d]: #moving right
-            self.animate(self.speed, 0)
+            self.velocity[0] = 10
         
-        if self.isJumping == False: #must be here otherwise would jump infinitly
-            if keys[pygame.K_SPACE]: # jumping
-                self.isJumping = True
-        else:
-            if self.jumpCount >= -8: #opposite of what was previosuly set,makes for euqal jump
-                negative = 1 #if this value is one, the player will fall down
-                if self.jumpCount < 0: #top of the jump
-                    negative = -1 #player will fall down
-                jumpSize = (self.jumpCount ** 2) * 0.25 * negative
-                self.rect.y -= jumpSize #changing the player's y position
-                # newScale -= (self.jumpCount ** 2) * 0.025 * negative #changing the player's shape
-                # self.rect.x -= (self.rect.width - newScale) * 0.5
-                # self.rect.width   -= (self.jumpCount ** 2) * 0.025 * negative
-                # self.rect.height  += (self.jumpCount ** 2) * 0.025 * negative
-                self.jumpCount -= 0.5 
-            else:
-                self.isJumping = False
-                self.jumpCount = 8
-
-        joysticks = []
-        for joystick in joysticks:
-            leftRight = joystick.get_axis(0)
-            if abs(leftRight) > 0.05: #moving left 
-                self.animate(-self.speed * leftRight, 0)  
-                
-            if self.isJumping == False:
-                if joystick.get_button(0):
-                    self.isJumping = True
-
-            else:
-                if self.jumpCount >= -8: #opposite of what was previosuly set,makes for euqal jump
-                    negative = 1 #if this value is one, the player will fall down
-                    if self.jumpCount < 0: #top of the jump
-                        negative = -1 #player will fall down
-                    jumpSize = (self.jumpCount ** 2) * 0.25 * negative
-                    self.rect.y -= jumpSize #changing the player's y position
-                    # newScale -= (self.jumpCount ** 2) * 0.025 * negative #changing the player's shape
-                    # self.rect.x -= (self.rect.width - newScale) * 0.5
-                    # self.rect.width   -= (self.jumpCount ** 2) * 0.025 * negative
-                    # self.rect.height  += (self.jumpCount ** 2) * 0.025 * negative                        self.jumpCount -= 0.5 
-                else:
-                    self.isJumping = False
-                    self.jumpCount = 8  
-        return joysticks
+        if keys[pygame.K_SPACE] and self.isOnGround():
+            jumpSFX = pygame.mixer.Sound("Sounds/Jump.wav")
+            jumpSFX.play()
+            self.velocity[1] -= 10
 
 
-    def checkCollisions(self, tileList):
-
-        for tile in tileList:         
-            if tile.colliderect(self.rect.x + self.velocity[0], self.rect.y, self.rect.width, self.rect.height):
-                self.velocity[0] = 0
-
+    def checkCollisions(self):
+        for tile in self.tileList:         
+            if tile.colliderect(self.rect.x + self.velocity[0], self.rect.y + self.rect.height / 4, self.rect.width / 2, self.rect.height / 2):
+                self.velocity[0] += 10
+            elif tile.colliderect(self.rect.x + self.velocity[0] + self.rect.width / 2, self.rect.y+ self.rect.height / 4, self.rect.width / 2, self.rect.height / 2):
+                self.velocity[0] -= 10
             if tile.colliderect(self.rect.x, self.rect.y + self.velocity[1], self.rect.width, self.rect.height):
-                print(self.velocity[1])
                 ##jumping upwards / ground below (in pygame speak)
                 if self.velocity[1] < 0:
-                    self.rect.top = (tile.bottom + 10)
-                    self.velocity[1] = 5
-                    print("Ground Avoce")
-	            #falling down / ground above
+                    self.rect.top = (tile.bottom + 0.1)
+                    self.velocity[1] = 0
+            #falling down / ground above
                 elif self.velocity[1] >= 0:
-                    self.rect.bottom = (tile.top - 10)
+                    self.rect.bottom = (tile.top - 0.1)
                     self.velocity[1] = 0 
 
-
+    def isOnGround(self):
+        for tile in self.tileList:
+            if tile.colliderect(self.rect.x, self.rect.y + self.velocity[1], self.rect.width, self.rect.height):
+                if self.velocity[1] >= 0:
+                    return True
+        return False

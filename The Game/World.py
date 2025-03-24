@@ -1,9 +1,9 @@
 import pygame
 
 class World():
-    def __init__(self, data):
+    def __init__(self, data, colour):
         self.data = data
-        self.colour = '#283618'
+        self.colour = colour
         self.tileList = []
 
     def buildWorld(self, tileSize):
