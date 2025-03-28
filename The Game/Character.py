@@ -95,8 +95,9 @@ class Player:
                     return True
         return False
     
-class Enemy(pygame.sprite.Sprite): #class in brackets means Enemy is a child of Pygame's Sprite class, and it'll inherit some functionality
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("Assets/Enemy1.png")
-        self.rect = self.image.get_rect()
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y, width=30, height=30):
+        super().__init__()
+        self.original_image = pygame.image.load("Assets/EGlitch1.PNG").convert_alpha()  
+        self.image = pygame.transform.scale(self.original_image, (width, height))  
+        self.rect = self.image.get_rect(topleft=(x, y))  

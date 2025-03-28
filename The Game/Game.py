@@ -4,6 +4,11 @@ import random
 import math
 from pygame.locals import *
 
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+print(os.path.dirname(os.path.abspath(__file__)))
 #eheheheheh
  
 from Character import Player, Enemy
