@@ -37,7 +37,6 @@ class Player:
                     return True
                 
     def update(self):
-        print(self.velocity)
         for i in range(1):
             self.checkCollisions()
 
@@ -79,7 +78,7 @@ class Player:
                 self.velocity[0] += 10
             elif tile.rect.colliderect(self.rect.x + self.velocity[0] + self.rect.width / 2, self.rect.y+ self.rect.height / 4, self.rect.width / 2, self.rect.height / 2):
                 self.velocity[0] -= 10
-            if tile.rect.colliderect(self.rect.x, self.rect.y + self.velocity[1], self.rect.width, self.rect.height):
+            elif tile.rect.colliderect(self.rect.x, self.rect.y + self.velocity[1], self.rect.width, self.rect.height):
                 ##jumping upwards / ground below (in pygame speak)
                 if self.velocity[1] < 0:
                     self.rect.top = (tile.rect.bottom + 0.1)
@@ -96,5 +95,8 @@ class Player:
                     return True
         return False
     
-class Enemy:
-    pass
+class Enemy(pygame.sprite.Sprite): #class in brackets means Enemy is a child of Pygame's Sprite class, and it'll inherit some functionality
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("Assets/Enemy1.png")
+        self.rect = self.image.get_rect()
