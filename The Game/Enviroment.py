@@ -40,4 +40,10 @@ class World():
             pygame.draw.rect(screen, tile.colour, tile.rect)
 
 class Button:
-    pass
+    def __init__(self, x, y, image):
+        self.x = x
+        self.y = y
+        self.image = image
+        self.rect = self.image.get_rect()
+
+    

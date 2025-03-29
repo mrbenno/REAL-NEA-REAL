@@ -1,7 +1,24 @@
 import pygame
-
 pygame.init()
+    
 
+class Enemy(pygame.sprite.Sprite): #Sprite class used here, carries over own functionality (draw etc...)
+    def __init__(self, x, y, width=30, height=30):
+        super().__init__()
+        self.image = pygame.image.load("Assets/Enemy1.PNG")  
+        self.image = pygame.transform.scale(self.image, (width, height))  
+        self.rect = self.image.get_rect(topleft=(x, y))  
+
+        self.glitchedFrames = []
+        self.index = 0
+        self.glitchCounter = 0
+        for i in range(1,3):
+            frame = pygame.image.load(f"Assets/GlitchFrame{i}.PNG")
+            frame = pygame.transform.scale(frame, (width, height))  
+            self.rect = self.image.get_rect(topleft=(x, y))
+            self.glitchedFrames.append(frame)
+
+            
 class Player:
     def __init__(self, rect, colour, speed, isJumping, onGround, jumpCount):       
         self.rect = rect
@@ -28,13 +45,15 @@ class Player:
     def draw(self, screen):
         pygame.draw.rect(screen, (self.colour), self.rect)
 
-    def checkIfDead(self, height):
+    def checkIfDead(self, height, enemies):
         if self.rect.y > height:
             return True
         for tile in self.tileList:         
             if tile.rect.colliderect(self.rect.x, self.rect.y + self.velocity[1], self.rect.width, self.rect.height):
                 if tile.kind == 2:
                     return True
+            if pygame.sprite.spritecollide(self, enemies, False):
+                return True
                 
     def update(self):
         for i in range(1):
@@ -44,31 +63,22 @@ class Player:
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]
 
-        self.velocity[0] *= 0.1
+        self.velocity[0] *= 0.001
         self.velocity[1] += 0.0
-
-        if self.checkIfDead(540):
-            deathSFX = pygame.mixer.Sound("Sounds/Death.wav")
-            deathSFX.play()
-            self.rect.x, self.rect.y = self.spawnPoint
-            self.velocity = [0,0]
-
-
-                
-    #self.rect.move_by(...)
 
     def checkInput(self):
         keys = pygame.key.get_pressed()
         
         #left and right always active, no restraints
         if keys[pygame.K_a]: #moving left   
-            self.velocity[0] = -10
+            self.velocity[0] = -self.speed
         if keys[pygame.K_d]: #moving right
-            self.velocity[0] = 10
+            self.velocity[0] = self.speed
         
         if (keys[pygame.K_SPACE] or keys[pygame.K_SPACE]) and self.isOnGround():
             self.velocity[1] -= 10
             jumpSFX = pygame.mixer.Sound("Sounds/Jump.wav")
+            jumpSFX.set_volume(0.5)
             jumpSFX.play()
 
 
@@ -94,10 +104,3 @@ class Player:
                 if self.velocity[1] >= 0:
                     return True
         return False
-    
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, width=30, height=30):
-        super().__init__()
-        self.original_image = pygame.image.load("Assets/EGlitch1.PNG").convert_alpha()  
-        self.image = pygame.transform.scale(self.original_image, (width, height))  
-        self.rect = self.image.get_rect(topleft=(x, y))  

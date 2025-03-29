@@ -2,14 +2,6 @@ import pygame
 import time
 import random
 import math
-from pygame.locals import *
-
-import os
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-
-print(os.path.dirname(os.path.abspath(__file__)))
-#eheheheheh
  
 from Character import Player, Enemy
 from Enviroment import World, Button
@@ -30,7 +22,7 @@ def main():
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -44,13 +36,13 @@ def main():
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
     ]
 
-    player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 7.5, False, False, 8)
+    player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False, False, 8)
     spikeGroup = pygame.sprite.Group()
     world3 = World(data3, '#2E4D4C')
     world3.buildWorld(tileSize, spikeGroup)
 
     while True:
-        screen.fill('#FFFFFF') #0A141F
+        screen.fill('#0A141F')
         handleEvents()
 
         player1.checkInput()
@@ -60,8 +52,13 @@ def main():
         player1.draw(screen)
         #pygame.draw.polygon(screen, '#000000', ((100, 100), (110, 100), (105, 105))) - commented for future reference
         spikeGroup.draw(screen)
+        if player1.checkIfDead(540, spikeGroup):
+            deathSFX = pygame.mixer.Sound("Sounds/Death.wav")
+            deathSFX.play()
+            player1.rect.x, player1.rect.y = player1.spawnPoint
+            player1.velocity = [0,0]
         pygame.display.flip() #display.flip updates entire screen, diaplay.update updates what's in brackets 
-        frame.tick(30)
+        frame.tick(60)
 
     return newScale
 
