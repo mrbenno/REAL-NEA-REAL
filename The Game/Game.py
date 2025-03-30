@@ -1,7 +1,6 @@
 import pygame
 import time
 import random
-import math
  
 from Character import Player, Enemy
 from Enviroment import World
@@ -37,13 +36,17 @@ def main():
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
     ]
 
+    #loading text
+    pixelTxt = pygame.font.Font("Font\Pixeltype.ttf", 35)
+
     #loading images
     PauseBtn = pygame.image.load("Assets/PauseBtn.PNG")
     PauseBtnDown = pygame.image.load("Assets/PauseBtnDown.png")
     pauseTitle = pygame.image.load("Assets/PauseTitle.png")
     ResumeBtn = pygame.image.load("Assets/ResumeBtn.png")
     ResumeBtnDown = pygame.image.load("Assets/ResumeBtnDown.png")
-
+    SettingsBtn = pygame.image.load("Assets/SettingsBtn.png")
+    SettingsBtnDown = pygame.image.load("Assets/SettingsBtnDown.png")
 
     player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False, False, 8, False)
     spikeGroup = pygame.sprite.Group()
@@ -52,6 +55,7 @@ def main():
     pauseButton = Button(PauseBtn, PauseBtnDown, 30, 30, dimensions[0] - 45, 45)
     pauseTitle = Title(pauseTitle, 200, 100, (dimensions[0] // 2) - 100, 100)
     resumeButton = Button(ResumeBtn, ResumeBtnDown, 160, 80, (dimensions[0] // 2) - 80, 200)
+    SettingsButton = Button(SettingsBtn, SettingsBtnDown, 150, 50, (dimensions[0] // 2) - 75, 300)
 
     while True:
         handleEvents()  
@@ -69,9 +73,12 @@ def main():
         elif player1.isPaused == True:
             screen.fill('#000000')
             pauseTitle.draw(screen)
-            
+
             if resumeButton.draw(screen):
                 player1.isPaused = False
+
+            if SettingsButton.draw(screen):
+                pass #will add settings functionality in next push
 
         if player1.isPaused == True and resumeButton.draw == True:
             pauseButton.draw = False
