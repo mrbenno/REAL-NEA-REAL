@@ -39,10 +39,10 @@ def main():
 
     #loading images
     PauseBtn = pygame.image.load("Assets/PauseBtn.PNG")
-    PauseBtnDown = pygame.image.load("Assets/PauseBtnDown.PNG")
-    pauseTitle = pygame.image.load("Assets/PauseTitle.PNG")
-    ResumeBtn = pygame.image.load("Assets/ResumeBtn.PNG")
-    ResumeBtnDown = pygame.image.load("Assets/ResumeBtnDown.PNG")
+    PauseBtnDown = pygame.image.load("Assets/PauseBtnDown.png")
+    pauseTitle = pygame.image.load("Assets/PauseTitle.png")
+    ResumeBtn = pygame.image.load("Assets/ResumeBtn.png")
+    ResumeBtnDown = pygame.image.load("Assets/ResumeBtnDown.png")
 
 
     player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False, False, 8, False)
@@ -69,7 +69,9 @@ def main():
         elif player1.isPaused == True:
             screen.fill('#000000')
             pauseTitle.draw(screen)
-            resumeButton.draw(screen)
+            
+            if resumeButton.draw(screen):
+                player1.isPaused = False
 
         if player1.isPaused == True and resumeButton.draw == True:
             pauseButton.draw = False
