@@ -36,27 +36,36 @@ def main():
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
     ]
 
+    #load images
+    pause = pygame.image.load("Assets/PauseBtn.PNG")
+    paused = pygame.image.load("Assets/pauseBtnDown.PNG")
+
     player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False, False, 8)
     spikeGroup = pygame.sprite.Group()
     world3 = World(data3, '#2E4D4C')
     world3.buildWorld(tileSize, spikeGroup)
+    pauseButton = Button(pause, paused, 30, 30, dimensions[0] - 45, 45)
 
     while True:
-        screen.fill('#0A141F')
-        handleEvents()
+        handleEvents()  
 
-        player1.checkInput()
-        world3.draw(screen)
         player1.updateTileList(world3.tileList)
-        player1.update()
-        player1.draw(screen)
-        #pygame.draw.polygon(screen, '#000000', ((100, 100), (110, 100), (105, 105))) - commented for future reference
-        spikeGroup.draw(screen)
+
+        if not player1.isPaused:
+            player1.checkInput()
+            player1.update()
+
+        drawEverything(screen, world3, player1, spikeGroup, pauseButton)
+
+        if pauseButton.draw == True:
+            player1.isPaused = True
+
         if player1.checkIfDead(540, spikeGroup):
             deathSFX = pygame.mixer.Sound("Sounds/Death.wav")
             deathSFX.play()
             player1.rect.x, player1.rect.y = player1.spawnPoint
             player1.velocity = [0,0]
+
         pygame.display.flip() #display.flip updates entire screen, diaplay.update updates what's in brackets 
         frame.tick(60)
 
@@ -68,9 +77,14 @@ def handleEvents():
             pygame.quit()
             exit()
 
-def drawEverything(screen, player1):
-    screen.fill('#000000')
+def drawEverything(screen, world, player, enemies, pause):
+    screen.fill('#0A141F')
 
-    pygame.draw.rect(screen, (player1.colour), player1.rect) 
+    world.draw(screen)
+    player.draw(screen)
+    enemies.draw(screen)
+    pause.draw(screen)
+
+
 
 main()

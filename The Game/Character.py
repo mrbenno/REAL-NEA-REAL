@@ -9,15 +9,6 @@ class Enemy(pygame.sprite.Sprite): #Sprite class used here, carries over own fun
         self.image = pygame.transform.scale(self.image, (width, height))  
         self.rect = self.image.get_rect(topleft=(x, y))  
 
-        self.glitchedFrames = []
-        self.index = 0
-        self.glitchCounter = 0
-        for i in range(1,3):
-            frame = pygame.image.load(f"Assets/GlitchFrame{i}.PNG")
-            frame = pygame.transform.scale(frame, (width, height))  
-            self.rect = self.image.get_rect(topleft=(x, y))
-            self.glitchedFrames.append(frame)
-
             
 class Player:
     def __init__(self, rect, colour, speed, isJumping, onGround, jumpCount):       
@@ -31,6 +22,7 @@ class Player:
         self.jumpCount = jumpCount
         self.tileList = []
         self.isDead = False
+        self.isPaused = False
 
 
     def updateTileList(self, new):
