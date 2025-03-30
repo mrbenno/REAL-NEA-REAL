@@ -4,7 +4,8 @@ import random
 import math
  
 from Character import Player, Enemy
-from Enviroment import World, Button
+from Enviroment import World
+from UI import Button, Title
 
 def main():
     pygame.init()
@@ -36,29 +37,43 @@ def main():
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
     ]
 
-    #load images
-    pause = pygame.image.load("Assets/PauseBtn.PNG")
-    paused = pygame.image.load("Assets/pauseBtnDown.PNG")
+    #loading images
+    PauseBtn = pygame.image.load("Assets/PauseBtn.PNG")
+    PauseBtnDown = pygame.image.load("Assets/PauseBtnDown.PNG")
+    pauseTitle = pygame.image.load("Assets/PauseTitle.PNG")
+    ResumeBtn = pygame.image.load("Assets/ResumeBtn.PNG")
+    ResumeBtnDown = pygame.image.load("Assets/ResumeBtnDown.PNG")
 
-    player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False, False, 8)
+
+    player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False, False, 8, False)
     spikeGroup = pygame.sprite.Group()
     world3 = World(data3, '#2E4D4C')
     world3.buildWorld(tileSize, spikeGroup)
-    pauseButton = Button(pause, paused, 30, 30, dimensions[0] - 45, 45)
+    pauseButton = Button(PauseBtn, PauseBtnDown, 30, 30, dimensions[0] - 45, 45)
+    pauseTitle = Title(pauseTitle, 200, 100, (dimensions[0] // 2) - 100, 100)
+    resumeButton = Button(ResumeBtn, ResumeBtnDown, 160, 80, (dimensions[0] // 2) - 80, 200)
 
     while True:
         handleEvents()  
 
         player1.updateTileList(world3.tileList)
 
-        if not player1.isPaused:
+        if pauseButton.draw(screen):
+            player1.isPaused = True
+
+        if player1.isPaused == False:
             player1.checkInput()
             player1.update()
+            drawEverything(screen, world3, player1, spikeGroup, pauseButton)
 
-        drawEverything(screen, world3, player1, spikeGroup, pauseButton)
+        elif player1.isPaused == True:
+            screen.fill('#000000')
+            pauseTitle.draw(screen)
+            resumeButton.draw(screen)
 
-        if pauseButton.draw == True:
-            player1.isPaused = True
+        if player1.isPaused == True and resumeButton.draw == True:
+            pauseButton.draw = False
+            player1.isPaused = False      
 
         if player1.checkIfDead(540, spikeGroup):
             deathSFX = pygame.mixer.Sound("Sounds/Death.wav")
@@ -84,7 +99,5 @@ def drawEverything(screen, world, player, enemies, pause):
     player.draw(screen)
     enemies.draw(screen)
     pause.draw(screen)
-
-
 
 main()

@@ -11,7 +11,7 @@ class Enemy(pygame.sprite.Sprite): #Sprite class used here, carries over own fun
 
             
 class Player:
-    def __init__(self, rect, colour, speed, isJumping, onGround, jumpCount):       
+    def __init__(self, rect, colour, speed, isJumping, onGround, jumpCount, isPaused):       
         self.rect = rect
         self.spawnPoint = (self.rect.x, self.rect.y) 
         self.colour = colour
@@ -22,7 +22,7 @@ class Player:
         self.jumpCount = jumpCount
         self.tileList = []
         self.isDead = False
-        self.isPaused = False
+        self.isPaused = isPaused
 
 
     def updateTileList(self, new):
@@ -48,30 +48,32 @@ class Player:
                 return True
                 
     def update(self):
-        for i in range(1):
-            self.checkCollisions()
+        if self.isPaused == False:
+            for i in range(1):
+                self.checkCollisions()
 
-        self.velocity[1] += 0.6
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
+            self.velocity[1] += 0.6
+            self.rect.x += self.velocity[0]
+            self.rect.y += self.velocity[1]
 
-        self.velocity[0] *= 0.001
-        self.velocity[1] += 0.0
+            self.velocity[0] *= 0.001
+            self.velocity[1] += 0.0
 
     def checkInput(self):
-        keys = pygame.key.get_pressed()
-        
-        #left and right always active, no restraints
-        if keys[pygame.K_a]: #moving left   
-            self.velocity[0] = -self.speed
-        if keys[pygame.K_d]: #moving right
-            self.velocity[0] = self.speed
-        
-        if (keys[pygame.K_SPACE] or keys[pygame.K_SPACE]) and self.isOnGround():
-            self.velocity[1] -= 10
-            jumpSFX = pygame.mixer.Sound("Sounds/Jump.wav")
-            jumpSFX.set_volume(0.5)
-            jumpSFX.play()
+        if self.isPaused == False:
+            keys = pygame.key.get_pressed()
+            
+            #left and right always active, no restraints
+            if keys[pygame.K_a]: #moving left   
+                self.velocity[0] = -self.speed
+            if keys[pygame.K_d]: #moving right
+                self.velocity[0] = self.speed
+            
+            if (keys[pygame.K_SPACE] or keys[pygame.K_SPACE]) and self.isOnGround():
+                self.velocity[1] -= 10
+                jumpSFX = pygame.mixer.Sound("Sounds/Jump.wav")
+                jumpSFX.set_volume(0.5)
+                jumpSFX.play()
 
 
     def checkCollisions(self):
