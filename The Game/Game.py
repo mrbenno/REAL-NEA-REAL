@@ -70,7 +70,7 @@ def main():
     pickle_in = open('Level Data/data_3', 'rb')
     data3 = pickle.load(pickle_in)
     world3 = World(data3, '#2E4D4C')
-
+ 
 
     # creating instances of classes, creates the player, world and it's obstacles
     player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False,
