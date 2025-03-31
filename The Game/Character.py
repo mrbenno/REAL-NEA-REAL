@@ -13,13 +13,13 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
    
 
-        self.frames = [pygame.image.load(x) for x in ["Assets/Enemy1.PNG", 
-                                                      "Assets/Enemy1.PNG", 
-                                                      "Assets/Enemy1.PNG", 
-                                                      "Assets/Enemy1.PNG", 
-                                                      "Assets/EnemyFrame1.PNG", 
-                                                      "Assets/EnemyFrame2.PNG", 
-                                                      "Assets/EnemyFrame3.PNG"]]
+        self.frames = [pygame.image.load(x) for x in ["Assets/Enemy1.png", 
+                                                      "Assets/Enemy1.png", 
+                                                      "Assets/Enemy1.png", 
+                                                      "Assets/Enemy1.png", 
+                                                      "Assets/EnemyFrame1.png", 
+                                                      "Assets/EnemyFrame2.png", 
+                                                      "Assets/EnemyFrame3.png"]]
 
         self.frames = [pygame.transform.scale(x, (width, height)) for x in self.frames]
         self.animation_index = random.randint(0, len(self.frames) - 1)

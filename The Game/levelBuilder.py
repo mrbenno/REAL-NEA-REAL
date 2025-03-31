@@ -13,6 +13,8 @@ screen = pygame.display.set_mode((720, 540))
 pygame.display.set_caption('Level Editor')
 
 white = ('#FFFFFF')
+grey  = ('#111111')
+red   = ('#FF0000') 
 black = ('#000000')
 
 world = [[0] * 24 for _ in range(18)]
@@ -40,6 +42,8 @@ running = True
 tile_size = 30 
 
 while running:
+    screen.fill('#000000')
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False 
@@ -57,11 +61,39 @@ while running:
                 pygame.draw.rect(screen, white, tile)
             elif tile == 2:
                 tile = pygame.Rect((tile_size * x, tile_size * y), (tile_size, tile_size))
-                pygame.draw.rect(screen, white, tile)
+                pygame.draw.rect(screen, grey, tile)
+            elif tile == 3:
+                tile = pygame.Rect((tile_size * x, tile_size * y), (tile_size, tile_size))
+                pygame.draw.rect(screen, red, tile)
+
+    mouse_pressed = pygame.mouse.get_just_pressed()
+
+    if mouse_pressed[0]:
+        position = pygame.mouse.get_pos()
+
+        tile_x, tile_y = position[0] // tile_size, position[1] // tile_size
+        world[tile_y][tile_x] += 1
+
+        if world[tile_y][tile_x] == 4:
+            world[tile_y][tile_x] = 0
+    
+    if mouse_pressed[2]:
+        position = pygame.mouse.get_pos()
+
+        tile_x, tile_y = position[0] // tile_size, position[1] // tile_size
+        world[tile_y][tile_x] = 0
+        print(world[tile_y][tile_x])
+
 
     clock.tick(frames)
     pygame.display.flip() 
 
+
+
+save = input("which file would you like to save to? ")
+
+with open(save, "wb") as f:
+    pickle.dump(world, f)
 
 # import pygame
 # import pickle

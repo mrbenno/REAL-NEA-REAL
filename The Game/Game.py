@@ -19,9 +19,9 @@ def main():
     main_title_icon = pygame.image.load("Assets/Titles.png")
     play_button_icon = pygame.image.load("Assets/PlayBtn.png")
     play_button_down_icon = pygame.image.load("Assets/PlayBtnDown.png")
-    pause_title_image = pygame.image.load("Assets/PauseTitle.PNG")
-    pause_button_icon = pygame.image.load("Assets/PauseBtn.PNG")
-    pause_button_down_icon = pygame.image.load("Assets/PauseBtnDown.PNG")
+    pause_title_image = pygame.image.load("Assets/PauseTitle.png")
+    pause_button_icon = pygame.image.load("Assets/PauseBtn.png")
+    pause_button_down_icon = pygame.image.load("Assets/PauseBtnDown.png")
     resume_button_icon = pygame.image.load("Assets/ResumeBtn.png")
     resume_button_down_icon = pygame.image.load("Assets/ResumeBtnDown.png")
     vol_up_button_icon = pygame.image.load("Assets/VolUpBtn.png")
@@ -38,34 +38,12 @@ def main():
     main_title_icon = pygame.transform.scale(main_title_icon, (500, 250))
 
     # loading fonts
-    pixelType = pygame.font.Font("Fonts\Pixeltype.ttf", 50)
+    pixelType = pygame.font.Font("Fonts/Pixeltype.ttf", 50)
 
 
     tile_size = 30
     main_menu = True
 
-    # # data = [
-    # #     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0],
-    # #     [1, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # #     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
-    # # ]
-    # with open("Level Data/data_1", "wb") as f:  # Use 'wb' to write in binary
-    #     pickle.dump(data, f)
 
     pickle_in = open('Level Data/data_3', 'rb')
     data3 = pickle.load(pickle_in)
@@ -75,6 +53,7 @@ def main():
     # creating instances of classes, creates the player, world and it's obstacles
     player1 = Player(pygame.Rect(60, dimensions[1] - 60, 25, 25), '#0A9B9A', 5, False,
                      False, 8, False, 0.53)
+    
     spike_group = pygame.sprite.Group()
 
 
@@ -94,8 +73,6 @@ def main():
     subtitle_toggle_off = Button(sub_tog_off, sub_tog_off_down, 50, 25, 575, 300)
     subtitle_toggle_on = Button(sub_tog_on, sub_tog_on_down, 50, 25, 575, 300)
     quit_button = Button(quit_button_icon, quit_button_down_icon, 100, 50, (dimensions[0] // 2) + 25, 450)
-
-
 
     #main Pygame loop required to keep it running until the player closes the window
     run = True
