@@ -1,4 +1,5 @@
 import pygame
+import random
 
 pygame.init()
 
@@ -10,10 +11,32 @@ class Enemy(pygame.sprite.Sprite):
 
     def __init__(self, x, y, width=30, height=30):
         super().__init__()
-        self.image = pygame.image.load("Assets/Enemy1.PNG")
-        self.image = pygame.transform.scale(self.image, (width, height))
+   
+
+        self.frames = [pygame.image.load(x) for x in ["Assets/Enemy1.PNG", 
+                                                      "Assets/Enemy1.PNG", 
+                                                      "Assets/Enemy1.PNG", 
+                                                      "Assets/Enemy1.PNG", 
+                                                      "Assets/EnemyFrame1.PNG", 
+                                                      "Assets/EnemyFrame2.PNG", 
+                                                      "Assets/EnemyFrame3.PNG"]]
+
+        self.frames = [pygame.transform.scale(x, (width, height)) for x in self.frames]
+        self.animation_index = random.randint(0, len(self.frames) - 1)
+        self.image = self.frames[self.animation_index]
+        self.timer = 0
+
         self.rect = self.image.get_rect(topleft=(x, y))
 
+    def animate(self, delta_time):
+        self.timer += delta_time
+
+        if self.timer < (1/15):
+            return 
+        
+        self.timer = 0
+        self.animation_index = (self.animation_index + 1) % len(self.frames)
+        self.image = self.frames[self.animation_index]
 
 class Player:
     def __init__(self, rect, colour, speed, is_jumping, on_ground, jump_count, is_paused, volume):
@@ -78,7 +101,8 @@ class Player:
                 self.velocity[1] -= 10
                 jump_sfx = pygame.mixer.Sound("Sounds/Jump.wav")
                 jump_sfx.set_volume(self.volume)
-                jump_sfx.play()
+                if self.volume > 0.04:
+                    jump_sfx.play()
 
         if keys[pygame.K_ESCAPE]:
             self.is_paused = True
