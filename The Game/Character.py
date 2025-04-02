@@ -49,7 +49,7 @@ class Player:
         self.on_ground = on_ground
         self.jump_count = jump_count
         self.tile_list = []
-        self.is_dead = False
+        # self.is_dead = False
         self.is_paused = is_paused
         self.volume = volume
 
@@ -65,15 +65,17 @@ class Player:
     def draw(self, screen):
         pygame.draw.rect(screen, self.colour, self.rect)
 
-    def check_if_dead(self, height, enemies):
+    def game_over(self, height, enemies):
         if self.rect.y > height:
-            return True
+            return -1
         for tile in self.tile_list:
             if tile.rect.colliderect(self.rect.x, self.rect.y + self.velocity[1], self.rect.width, self.rect.height):
                 if tile.kind == 2:
-                    return True
+                    return -1
+                elif tile.kind == 4:
+                    return 1
             if pygame.sprite.spritecollide(self, enemies, False):
-                return True
+                return -1
 
     def update(self):
         if not self.is_paused:
@@ -97,7 +99,7 @@ class Player:
             if keys[pygame.K_d]:  # moving right
                 self.velocity[0] = self.speed
 
-            if (keys[pygame.K_SPACE] or keys[pygame.K_SPACE]) and self.is_on_ground():
+            if (keys[pygame.K_SPACE] or keys[pygame.K_w]) and self.is_on_ground():
                 self.velocity[1] -= 10
                 jump_sfx = pygame.mixer.Sound("Sounds/Jump.wav")
                 jump_sfx.set_volume(self.volume)
@@ -109,28 +111,29 @@ class Player:
 
     def check_collisions(self):
         for tile in self.tile_list:
-            if tile.rect.colliderect(self.rect.x + self.velocity[0],
-                                     self.rect.y + self.rect.height / 4,
-                                     self.rect.width / 2,
-                                     self.rect.height / 2):
-                self.velocity[0] += 10
-            elif tile.rect.colliderect(self.rect.x + self.velocity[0] + self.rect.width / 2,
-                                       self.rect.y + self.rect.height / 4,
-                                       self.rect.width / 2,
-                                       self.rect.height / 2):
-                self.velocity[0] -= 10
-            elif tile.rect.colliderect(self.rect.x,
-                                       self.rect.y + self.velocity[1],
-                                       self.rect.width,
-                                       self.rect.height):
-                # jumping upwards / ground below (in pygame speak)
-                if self.velocity[1] < 0:
-                    self.rect.top = (tile.rect.bottom + 0.1)
-                    self.velocity[1] = 0
-                # falling down / ground above
-                elif self.velocity[1] >= 0:
-                    self.rect.bottom = (tile.rect.top - 0.1)
-                    self.velocity[1] = 0
+            if tile.kind != 4:
+                if tile.rect.colliderect(self.rect.x + self.velocity[0],
+                                        self.rect.y + self.rect.height / 4,
+                                        self.rect.width / 2,
+                                        self.rect.height / 2):
+                    self.velocity[0] += 10
+                elif tile.rect.colliderect(self.rect.x + self.velocity[0] + self.rect.width / 2,
+                                        self.rect.y + self.rect.height / 4,
+                                        self.rect.width / 2,
+                                        self.rect.height / 2):
+                    self.velocity[0] -= 10
+                elif tile.rect.colliderect(self.rect.x,
+                                        self.rect.y + self.velocity[1],
+                                        self.rect.width,
+                                        self.rect.height):
+                    # jumping upwards / ground below (in pygame speak)
+                    if self.velocity[1] < 0:
+                        self.rect.top = (tile.rect.bottom + 0.1)
+                        self.velocity[1] = 0
+                    # falling down / ground above
+                    elif self.velocity[1] >= 0:
+                        self.rect.bottom = (tile.rect.top - 0.1)
+                        self.velocity[1] = 0
 
     def is_on_ground(self):
         for tile in self.tile_list:
