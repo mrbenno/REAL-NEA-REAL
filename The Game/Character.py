@@ -89,6 +89,7 @@ class Player:
             self.velocity[0] *= 0.001
             self.velocity[1] += 0.0
 
+
     def check_input(self):
         if not self.is_paused:
             keys = pygame.key.get_pressed()

@@ -1,6 +1,7 @@
 #imports
 import pygame   
 import pickle
+import time
 
 #initialisation
 pygame.init()
@@ -25,7 +26,6 @@ filename = input("Would you like to load a level? ")
 try:
     with open(filename, 'rb') as file:
         world = pickle.load(file)
-    
     print("successful load")
 except:
     for x in range(len(world[0])):
@@ -73,10 +73,12 @@ while running:
 
         tile_x, tile_y = position[0] // tile_size, position[1] // tile_size
         world[tile_y][tile_x] += 1
+        time.sleep(2)
 
         if world[tile_y][tile_x] == 5:
             world[tile_y][tile_x] = 0
-    
+            time.sleep(2)
+               
     if mouse_pressed[2]:
         position = pygame.mouse.get_pos()
 
