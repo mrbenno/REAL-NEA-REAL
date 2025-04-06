@@ -7,7 +7,7 @@ import time
 
 from Character import Player
 from Enviroment import World
-from UI import Button, Title
+from UI import Button, Title, Paragraph
 
 # defining the main function, contains most variables and instances of objects
 def main():
@@ -52,11 +52,16 @@ def main():
     # loading fonts
     pixelType_title = pygame.font.Font("Fonts/Pixeltype.ttf", 50)
     pixelType_body = pygame.font.Font("Fonts/Pixeltype.ttf", 40)
+    nimbus_bold = pygame.font.Font("Fonts/NimbusMono-Bold.otf", 15)
 
     tile_size = 30 #needed for the world building system to work
     main_menu = True # allows the program to start on the main menu
     level = 1 # tells the program what level to start on
     max_level = 5 # tell the program what the highest level is
+
+    fifties_p_1 = ("After the multiple technological innovations of the 1940s, \n " +
+                   "some of the more notable being Alan Turing's Bombe Machine, \n " +
+                   "the fifties were looking to introduce even more of the sort.")
 
     # accessing the world files using the Pickle module
     if path.exists(f'Level Data/data_{level}'): # checks to see if a path exists for a select level
@@ -73,20 +78,14 @@ def main():
 
     # rendering text
     description_1 = pixelType_body.render("Press SPACE to continue.", True, '#FFFFFF')
-    paragraph_1 = pixelType_body.render(
-         "After the multiple technological innovations of the 1940s,"
-         "some of the more notable being Alan Turing's Bombe Machine, "
-         "the fifties were looking to introduce even more of the sort.", True, '#FFFFFF')
-
     subtitles_label = pixelType_title.render("Subtitles", True, '#FFFFFF')
-
-    # more instances of classes, creates the menus and general user interface
-    nimbus_bold = pygame.font.Font("Fonts/NimbusMono-Bold.otf", 15)
+    
     player_tooltip_1 = nimbus_bold.render("Press A and D to move left and right.", True, '#FFFFFF')
     player_tooltip_2 = nimbus_bold.render("Press SPACE to jump.", True, '#FFFFFF')
     player_tooltip_3 = nimbus_bold.render("Watch out for the RED LAVA.", True, '#FFFFFF')
-    player_tooltip_4 = nimbus_bold.render("Watch out for the SPIKES too.", True, '#FFFFFF')
+    player_tooltip_4 = nimbus_bold.render("Watch out for the SPIKES too.", True, '#FFFFFF')    
 
+    # more instances of classes, creates the menus and general user interface
     main_title = Title(main_title_icon, 500, 250, dimensions[0] // 2 - 250, 25)
     fifties_title = Title(fifties_title_icon, dimensions[0], dimensions[0] // 2, 0, 100)
     play_button = Button(play_button_icon, play_button_down_icon, 150, 100, (dimensions[0] // 2) - 75, 300)
@@ -101,6 +100,9 @@ def main():
     subtitle_toggle_on = Button(sub_tog_on, sub_tog_on_down, 50, 25, 575, 300)
     restart_button = Button(restart_button_icon, restart_button_icon_down, 160, 50, (dimensions[0] // 2) + 25, 350)
     quit_button = Button(quit_button_icon, quit_button_down_icon, 100, 50, (dimensions[0] // 2) + 25, 450)
+
+    fifties_paragraph_1 = Paragraph(fifties_p_1, 20, pixelType_body, 25, 25, 10)
+    print(fifties_paragraph_1.render_list)
 
     #main Pygame loop required to keep it running until the player closes the window
     run = True
@@ -121,75 +123,75 @@ def main():
                   
         else: # once main menu set to false, actual game begins
             if scene1 == True:
-                output = fifties_intro(screen, fifties_title, description_1, paragraph_1)  
+                output = fifties_intro(screen)
                 if output == True:
                     scene1 = False
             
-            # if scene1 == False:
-            #     if pause_button.draw(screen):
-            #         player1.is_paused = True
+            if scene1 == False:
+                if pause_button.draw(screen):
+                    player1.is_paused = True
 
-            #     if not player1.is_paused:
-            #         player1.check_input()
-            #         player1.update()
-            #         draw_everything(screen, player1, spike_group, pause_button)
+                if not player1.is_paused:
+                    player1.check_input()
+                    player1.update()
+                    draw_everything(screen, player1, spike_group, pause_button)
                     
-            #         for spike in spike_group:
-            #             spike.animate(delta_time)
+                    for spike in spike_group:
+                        spike.animate(delta_time)
 
-            #         world.draw(screen)
-            #         player1.update_tile_list(world.tileList)
+                    world.draw(screen)
+                    player1.update_tile_list(world.tileList)
 
-            #         game_over = player1.game_over(540, spike_group)
+                    game_over = player1.game_over(540, spike_group)
                     
-            #         if game_over == -1:
-            #             death_sfx = pygame.mixer.Sound("Sounds/Death.wav")
-            #             death_sfx.set_volume(player1.volume)
-            #             if player1.volume > 0.04:
-            #                 death_sfx.play()
-            #             level = 1
-            #             data = []
-            #             world = level_reset(level, player1, spike_group)
-            #             world.build_world(tile_size, spike_group)
-            #             player1.rect.x, player1.rect.y = player1.spawnPoint
-            #             player1.velocity = [0, 0]
-            #             game_over = 0
-            #         elif game_over == 1:
-            #             level += 1
-            #             if level <= max_level:
-            #                 data = []
-            #                 world = level_reset(level, player1, spike_group)
-            #                 world.build_world(tile_size, spike_group)
-            #                 game_over = 0
-            #             else:
-            #                 screen.fill('#000000')
+                    if game_over == -1:
+                        death_sfx = pygame.mixer.Sound("Sounds/Death.wav")
+                        death_sfx.set_volume(player1.volume)
+                        if player1.volume > 0.04:
+                            death_sfx.play()
+                        level = 1
+                        data = []
+                        world = level_reset(level, player1, spike_group)
+                        world.build_world(tile_size, spike_group)
+                        player1.rect.x, player1.rect.y = player1.spawnPoint
+                        player1.velocity = [0, 0]
+                        game_over = 0
+                    elif game_over == 1:
+                        level += 1
+                        if level <= max_level:
+                            data = []
+                            world = level_reset(level, player1, spike_group)
+                            world.build_world(tile_size, spike_group)
+                            game_over = 0
+                        else:
+                            screen.fill('#000000')
 
-            #         if level == 1:
-            #              screen.blit(player_tooltip_1, player1.rect.topright + (25, 25))
-            #         elif level == 2:
-            #              screen.blit(player_tooltip_2, player1.rect.topright)
-            #         elif level == 3:
-            #              screen.blit(player_tooltip_3, player1.rect.topright)
-            #         elif level == 4:
-            #              screen.blit(player_tooltip_4, player1.rect.topright)
+                    if level == 1:
+                         screen.blit(player_tooltip_1, player1.rect.topright + (25, 25))
+                    elif level == 2:
+                         screen.blit(player_tooltip_2, player1.rect.topright)
+                    elif level == 3:
+                         screen.blit(player_tooltip_3, player1.rect.topright)
+                    elif level == 4:
+                         screen.blit(player_tooltip_4, player1.rect.topright)
 
-            #     elif player1.is_paused:
-            #         fifties_title_small.draw
-            #         result = (pause_menu(screen, player1, pause_title_image, resume_button, pixelType_title, volume_up_button, volume_down_button, 
-            #                             subtitles_label, subtitle_toggle_on, subtitle_toggle_off, restart_button, quit_button))
-            #         if result == 6:
-            #                 player1.is_paused = False
-            #                 level = 1
-            #                 data = []
-            #                 world = level_reset(level, player1, spike_group)
-            #                 world.build_world(tile_size, spike_group)
+                elif player1.is_paused:
+                    fifties_title_small.draw
+                    result = (pause_menu(screen, player1, pause_title_image, resume_button, pixelType_title, volume_up_button, volume_down_button, 
+                                        subtitles_label, subtitle_toggle_on, subtitle_toggle_off, restart_button, quit_button))
+                    if result == 6:
+                            player1.is_paused = False
+                            level = 1
+                            data = []
+                            world = level_reset(level, player1, spike_group)
+                            world.build_world(tile_size, spike_group)
                     
-            #         elif result == 7:
-            #             run = False
+                    elif result == 7:
+                        run = False
 
-            #     if player1.is_paused and not resume_button.draw:
-            #         pause_button.draw = False
-            #         player1.is_paused = False
+                if player1.is_paused and not resume_button.draw:
+                    pause_button.draw = False
+                    player1.is_paused = False
 
         pygame.display.flip()  # display.flip updates entire screen, display.update updates what's in brackets
 
