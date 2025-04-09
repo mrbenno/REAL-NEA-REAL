@@ -7,7 +7,7 @@ import time
 
 from Character import Player
 from Enviroment import World
-from UI import Button, Title, Paragraph
+from UI import Button, Title
 
 # defining the main function, contains most variables and instances of objects
 def main():
@@ -57,11 +57,7 @@ def main():
     tile_size = 30 #needed for the world building system to work
     main_menu = True # allows the program to start on the main menu
     level = 1 # tells the program what level to start on
-    max_level = 5 # tell the program what the highest level is
-
-    fifties_p_1 = ("After the multiple technological innovations of the 1940s, \n " +
-                   "some of the more notable being Alan Turing's Bombe Machine, \n " +
-                   "the fifties were looking to introduce even more of the sort.")
+    max_level = 5 # tell the program what the highest level isa
 
     # accessing the world files using the Pickle module
     if path.exists(f'Level Data/data_{level}'): # checks to see if a path exists for a select level
@@ -70,9 +66,9 @@ def main():
     world = World(data, '#2E4D4C') # the data variable is used to create an instance of the World class
  
 
-    # creating instances of classes, creates the player, world and it's obstacles
+    # creating instances of classes, creates the player etc
     player1 = Player(pygame.Rect(60, dimensions[1] - 120, 25, 25), '#0A9B9A', 5, False,
-                     False, 8, False, 0.53)
+                     False, False, 8, 0.53)
     
     spike_group = pygame.sprite.Group()
 
@@ -92,7 +88,7 @@ def main():
     fifties_title_small = Title(fifties_title_icon, dimensions[0] // 2, dimensions[0] // 4, 0, 25)
 
     pause_button = Button(pause_button_icon, pause_button_down_icon, 30, 30, dimensions[0] - 90, 45)
-    pause_title_image = Title(pause_title_image, 200, 100, (dimensions[0] // 2) + 25, 25)
+    pause_title = Title(pause_title_image, 200, 100, (dimensions[0] // 2) + 25, 25)
     resume_button = Button(resume_button_icon, resume_button_down_icon, 160, 50, (dimensions[0] // 2) + 25, 150)
     volume_up_button = Button(vol_up_button_icon, vol_up_button_down_icon, 25,25, 610, 250)
     volume_down_button = Button(vol_down_button_icon, vol_down_button_down_icon, 25, 25, 575, 250)
@@ -100,9 +96,6 @@ def main():
     subtitle_toggle_on = Button(sub_tog_on, sub_tog_on_down, 50, 25, 575, 300)
     restart_button = Button(restart_button_icon, restart_button_icon_down, 160, 50, (dimensions[0] // 2) + 25, 350)
     quit_button = Button(quit_button_icon, quit_button_down_icon, 100, 50, (dimensions[0] // 2) + 25, 450)
-
-    fifties_paragraph_1 = Paragraph(fifties_p_1, 20, pixelType_body, 25, 25, 10)
-    print(fifties_paragraph_1.render_list)
 
     #main Pygame loop required to keep it running until the player closes the window
     run = True
@@ -123,7 +116,7 @@ def main():
                   
         else: # once main menu set to false, actual game begins
             if scene1 == True:
-                output = fifties_intro(screen)
+                output = fifties_intro(screen, fifties_title, description_1)
                 if output == True:
                     scene1 = False
             
@@ -153,7 +146,7 @@ def main():
                         data = []
                         world = level_reset(level, player1, spike_group)
                         world.build_world(tile_size, spike_group)
-                        player1.rect.x, player1.rect.y = player1.spawnPoint
+                        player1.rect.x, player1.rect.y = player1.spawn_point
                         player1.velocity = [0, 0]
                         game_over = 0
                     elif game_over == 1:
@@ -167,17 +160,17 @@ def main():
                             screen.fill('#000000')
 
                     if level == 1:
-                         screen.blit(player_tooltip_1, player1.rect.topright + (25, 25))
+                         screen.blit(player_tooltip_1, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
                     elif level == 2:
-                         screen.blit(player_tooltip_2, player1.rect.topright)
+                         screen.blit(player_tooltip_2, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
                     elif level == 3:
-                         screen.blit(player_tooltip_3, player1.rect.topright)
+                         screen.blit(player_tooltip_3, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
                     elif level == 4:
-                         screen.blit(player_tooltip_4, player1.rect.topright)
+                         screen.blit(player_tooltip_4, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
 
                 elif player1.is_paused:
                     fifties_title_small.draw
-                    result = (pause_menu(screen, player1, pause_title_image, resume_button, pixelType_title, volume_up_button, volume_down_button, 
+                    result = (pause_menu(screen, player1, pause_title, resume_button, pixelType_title, volume_up_button, volume_down_button, 
                                         subtitles_label, subtitle_toggle_on, subtitle_toggle_off, restart_button, quit_button))
                     if result == 6:
                             player1.is_paused = False
@@ -213,19 +206,11 @@ def draw_everything(screen, player, enemies, pause):
     enemies.draw(screen)
     pause.draw(screen)
 
-def fifties_intro(screen, title, text, text2):
+def fifties_intro(screen, title, text):
     titles = True
     screen.fill('#000000')
     title.draw(screen)
     screen.blit(text, (85, 450))
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_SPACE]:
-         titles = False
-
-    if titles == False:
-         screen.fill('#000000')
-         screen.blit(text2, (25, 25))
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_SPACE]:
@@ -266,7 +251,7 @@ def pause_menu(screen, player, title, button1, font, button2, button3, text2, bu
 
 
 def level_reset(level, player, spikes):
-    player.rect.x, player.rect.y = player.spawnPoint
+    player.rect.x, player.rect.y = player.spawn_point
     player.velocity = [0, 0]
 
     spikes.empty()

@@ -67,31 +67,3 @@ class Menu():
             if self.button3.draw(screen):
                 return 3
             
-
-class Paragraph():
-    def __init__(self, paragraph, font_size, font, x, y, leading):
-        self.paragraph = paragraph
-        self.font_size = font_size
-        self.font = font
-        self.x = x
-        self.y = y
-        self.leading = leading
-
-
-    def render_list(self):
-        rendered = [] # creates list to store rendered text in
-        for i, line in enumerate(self.paragraph.split('\n')): # for i in line breaks (\n)
-            text_surface, text_rect = self.font.render(line, '#FFFFFF') # assigns the text_surface and text_rect variables to Pygame's text rendering function
-            text_rect.topleft = (self.x, self.y + i, * (self.font_size + self.leading)) # top left co-ord of the rect is assigned to these values so that it can change with each new line
-            rendered.append(text_surface, text_rect) # surface and rect are added to the list as tuples
-
-            return text_surface, text_rect, rendered
-     
-        
-    def draw(self, screen, rendered):
-        screen.fill('#000000')
-        for text_surface, text_rect in rendered:
-            screen.blit(text_surface, text_rect)
-        return True
-
-

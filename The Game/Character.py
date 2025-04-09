@@ -39,9 +39,9 @@ class Enemy(pygame.sprite.Sprite):
         self.image = self.frames[self.animation_index]
 
 class Player:
-    def __init__(self, rect, colour, speed, is_jumping, on_ground, jump_count, is_paused, volume):
+    def __init__(self, rect, colour, speed, is_jumping, on_ground, is_paused, jump_count, volume):
         self.rect = rect
-        self.spawnPoint = (self.rect.x, self.rect.y)
+        self.spawn_point = (self.rect.x, self.rect.y)
         self.colour = colour
         self.velocity = [0, 0]
         self.speed = speed
@@ -49,21 +49,22 @@ class Player:
         self.on_ground = on_ground
         self.jump_count = jump_count
         self.tile_list = []
-        # self.is_dead = False
         self.is_paused = is_paused
         self.volume = volume
 
     def update_tile_list(self, new):
         self.tile_list = new
 
-    # function which animates player
+
+    # subroutine which animates player
     def animate(self, x, y):
         self.velocity[0] += x
         self.velocity[1] += y
-        # friendly reminder #1: self means actual object being edited, anything not 'self.' normal var
+
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.colour, self.rect)
+
 
     def game_over(self, height, enemies):
         if self.rect.y > height:
@@ -76,6 +77,7 @@ class Player:
                     return 1
             if pygame.sprite.spritecollide(self, enemies, False):
                 return -1
+
 
     def update(self):
         if not self.is_paused:
@@ -110,6 +112,7 @@ class Player:
         if keys[pygame.K_ESCAPE]:
             self.is_paused = True
 
+
     def check_collisions(self):
         for tile in self.tile_list:
             if tile.kind != 4:
@@ -135,6 +138,7 @@ class Player:
                     elif self.velocity[1] >= 0:
                         self.rect.bottom = (tile.rect.top - 0.1)
                         self.velocity[1] = 0
+
 
     def is_on_ground(self):
         for tile in self.tile_list:

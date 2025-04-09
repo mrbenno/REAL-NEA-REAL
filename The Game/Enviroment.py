@@ -47,11 +47,3 @@ class World:
     def draw(self, screen):
         for tile in self.tileList:
             pygame.draw.rect(screen, tile.colour, tile.rect)
-
-
-class Exit(pygame.sprite.Sprite):
-	def __init__(self, x, y):
-		pygame.sprite.Sprite.__init__(self)
-		self.rect = self.image.get_rect()
-		self.rect.x = x
-		self.rect.y = y
