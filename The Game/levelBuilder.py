@@ -14,7 +14,7 @@ screen = pygame.display.set_mode((720, 540))
 pygame.display.set_caption('Level Editor')
 
 white = ('#FFFFFF')
-red   = ('#C1121F') 
+red   = ('#C1121F')
 green = ('#507C58')
 blue  = ('#003049')
 black = ('#000000')
@@ -73,7 +73,7 @@ while running:
 
         tile_x, tile_y = position[0] // tile_size, position[1] // tile_size
         world[tile_y][tile_x] += 1
-        time.sleep(2)
+        time.sleep(0.1)
 
         if world[tile_y][tile_x] == 5:
             world[tile_y][tile_x] = 0

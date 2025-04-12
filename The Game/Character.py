@@ -4,10 +4,7 @@ import random
 pygame.init()
 
 
-class Enemy(pygame.sprite.Sprite):
-    """
-    Sprite class used here, carries over own functionality (draw etc...)
-    """
+class Enemy(pygame.sprite.Sprite): # Sprite class used here, carries over own functionality (draw etc...)
 
     def __init__(self, x, y, width=30, height=30):
         super().__init__()
@@ -39,10 +36,10 @@ class Enemy(pygame.sprite.Sprite):
         self.image = self.frames[self.animation_index]
 
 class Player:
-    def __init__(self, rect, colour, speed, is_jumping, on_ground, is_paused, jump_count, volume):
+    def __init__(self, rect, speed, is_jumping, on_ground, is_paused, jump_count, volume):
         self.rect = rect
         self.spawn_point = (self.rect.x, self.rect.y)
-        self.colour = colour
+        self.colour = ('#0A9B9A')
         self.velocity = [0, 0]
         self.speed = speed
         self.is_jumping = is_jumping
@@ -79,40 +76,6 @@ class Player:
                 return -1
 
 
-    def update(self):
-        if not self.is_paused:
-            for i in range(1):
-                self.check_collisions()
-
-            self.velocity[1] += 0.6
-            self.rect.x += self.velocity[0]
-            self.rect.y += self.velocity[1]
-
-            self.velocity[0] *= 0.001
-            self.velocity[1] += 0.0
-
-
-    def check_input(self):
-        if not self.is_paused:
-            keys = pygame.key.get_pressed()
-
-            # left and right always active, no restraints
-            if keys[pygame.K_a]:  # moving left
-                self.velocity[0] = -self.speed
-            if keys[pygame.K_d]:  # moving right
-                self.velocity[0] = self.speed
-
-            if (keys[pygame.K_SPACE] or keys[pygame.K_w]) and self.is_on_ground():
-                self.velocity[1] -= 10
-                jump_sfx = pygame.mixer.Sound("Sounds/Jump.wav")
-                jump_sfx.set_volume(self.volume)
-                if self.volume > 0.04:
-                    jump_sfx.play()
-
-        if keys[pygame.K_ESCAPE]:
-            self.is_paused = True
-
-
     def check_collisions(self):
         for tile in self.tile_list:
             if tile.kind != 4:
@@ -138,6 +101,40 @@ class Player:
                     elif self.velocity[1] >= 0:
                         self.rect.bottom = (tile.rect.top - 0.1)
                         self.velocity[1] = 0
+
+
+    def update(self):
+        if not self.is_paused:
+            for i in range(1):
+                self.check_collisions()
+
+            
+            self.rect.x += self.velocity[0]
+            self.rect.y += self.velocity[1]
+
+            self.velocity[0] *= 0.001
+            self.velocity[1] += 0.6
+
+
+    def check_input(self):
+        if not self.is_paused:
+            keys = pygame.key.get_pressed()
+
+            # left and right always active, no restraints
+            if keys[pygame.K_a]:  # moving left
+                self.velocity[0] = -self.speed
+            if keys[pygame.K_d]:  # moving right
+                self.velocity[0] = self.speed
+
+            if (keys[pygame.K_SPACE] or keys[pygame.K_w]) and self.is_on_ground():
+                self.velocity[1] -= 10
+                jump_sfx = pygame.mixer.Sound("Sounds/Jump.wav")
+                jump_sfx.set_volume(self.volume)
+                if self.volume > 0.04:
+                    jump_sfx.play()
+
+        if keys[pygame.K_ESCAPE]:
+            self.is_paused = True
 
 
     def is_on_ground(self):

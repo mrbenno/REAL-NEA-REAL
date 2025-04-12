@@ -7,7 +7,7 @@ import time
 
 from Character import Player
 from Enviroment import World
-from UI import Button, Title
+from UI import Button, Title, Quiz
 
 # defining the main function, contains most variables and instances of objects
 def main():
@@ -15,6 +15,7 @@ def main():
 
     #creating a window, getting it's dimensions, and defining frame as the instance of Pygame's Clock class
     screen = pygame.display.set_mode((720, 540))
+    pygame.display.set_caption('The Creator')
     dimensions = [screen.get_width(), screen.get_height()]
     frame = pygame.time.Clock()
 
@@ -41,14 +42,6 @@ def main():
     sub_tog_on = pygame.image.load("Assets/SubtitleTglOn.png")
     sub_tog_on_down = pygame.image.load("Assets/SubtitleTglOnDown.png")
 
-    option_button_icon1 = pygame.image.load("Assets/Options/Options-1.png")
-    option_button_icon2 = pygame.image.load("Assets/Options/Options-2.png")
-    option_button_icon3 = pygame.image.load("Assets/Options/Options-3.png")
-    option_button_icon4 = pygame.image.load("Assets/Options/Options-4.png")
-    option_button_icon5 = pygame.image.load("Assets/Options/Options-5.png")
-    option_button_icon6 = pygame.image.load("Assets/Options/Options-6.png")
-
-
     # loading fonts
     pixelType_title = pygame.font.Font("Fonts/Pixeltype.ttf", 50)
     pixelType_body = pygame.font.Font("Fonts/Pixeltype.ttf", 40)
@@ -58,28 +51,35 @@ def main():
     main_menu = True # allows the program to start on the main menu
     level = 1 # tells the program what level to start on
     max_level = 5 # tell the program what the highest level isa
+    test_question = [False]
+    result = [None, 0]
+
+
+    white = ('#FFFFFF')
+    black = ('#000000')
+    
 
     # accessing the world files using the Pickle module
     if path.exists(f'Level Data/data_{level}'): # checks to see if a path exists for a select level
         pickle_in = open(f'Level Data/data_{level}', 'rb') # if true, file is opened and put into the pickle_in variable
         data = pickle.load(pickle_in) # the file's pickled contents are read and assigned to the data variable
-    world = World(data, '#2E4D4C') # the data variable is used to create an instance of the World class
+    world = World(data) # the data variable is used to create an instance of the World class
  
 
     # creating instances of classes, creates the player etc
-    player1 = Player(pygame.Rect(60, dimensions[1] - 120, 25, 25), '#0A9B9A', 5, False,
+    player1 = Player(pygame.Rect(60, dimensions[1] - 120, 25, 25), 5, False,
                      False, False, 8, 0.53)
     
     spike_group = pygame.sprite.Group()
 
     # rendering text
-    description_1 = pixelType_body.render("Press SPACE to continue.", True, '#FFFFFF')
-    subtitles_label = pixelType_title.render("Subtitles", True, '#FFFFFF')
+    description_1 = pixelType_body.render("Press SPACE to continue.", True, white)
+    subtitles_label = pixelType_title.render("Subtitles", True, white)
     
-    player_tooltip_1 = nimbus_bold.render("Press A and D to move left and right.", True, '#FFFFFF')
-    player_tooltip_2 = nimbus_bold.render("Press SPACE to jump.", True, '#FFFFFF')
-    player_tooltip_3 = nimbus_bold.render("Watch out for the RED LAVA.", True, '#FFFFFF')
-    player_tooltip_4 = nimbus_bold.render("Watch out for the SPIKES too.", True, '#FFFFFF')    
+    player_tooltip_1 = nimbus_bold.render("Press A and D to move left and right.", True, white)
+    player_tooltip_2 = nimbus_bold.render("Press W or SPACE to jump.", True, white)
+    player_tooltip_3 = nimbus_bold.render("Watch out for the RED LAVA.", True, white)
+    player_tooltip_4 = nimbus_bold.render("Watch out for the SPIKES too.", True, white)    
 
     # more instances of classes, creates the menus and general user interface
     main_title = Title(main_title_icon, 500, 250, dimensions[0] // 2 - 250, 25)
@@ -94,8 +94,13 @@ def main():
     volume_down_button = Button(vol_down_button_icon, vol_down_button_down_icon, 25, 25, 575, 250)
     subtitle_toggle_off = Button(sub_tog_off, sub_tog_off_down, 50, 25, 575, 300)
     subtitle_toggle_on = Button(sub_tog_on, sub_tog_on_down, 50, 25, 575, 300)
-    restart_button = Button(restart_button_icon, restart_button_icon_down, 160, 50, (dimensions[0] // 2) + 25, 350)
+    restart_button = Button(restart_button_icon, restart_button_icon_down, 160, 50, (dimensions[0] // 2) + 25, 375)
     quit_button = Button(quit_button_icon, quit_button_down_icon, 100, 50, (dimensions[0] // 2) + 25, 450)
+
+    test_question_icon = pygame.image.load("Assets/Test.jpg")
+    test_choices = ("One lots", "Two buckets", "Three dreams", "Four gerkins")
+    test_question_text = Quiz(test_question_icon, 360, 75, test_choices, 2)
+
 
     #main Pygame loop required to keep it running until the player closes the window
     run = True
@@ -116,7 +121,7 @@ def main():
                   
         else: # once main menu set to false, actual game begins
             if scene1 == True:
-                output = fifties_intro(screen, fifties_title, description_1)
+                output = fifties_intro(screen, fifties_title, description_1, test_question_text, test_question, result)
                 if output == True:
                     scene1 = False
             
@@ -133,7 +138,7 @@ def main():
                         spike.animate(delta_time)
 
                     world.draw(screen)
-                    player1.update_tile_list(world.tileList)
+                    player1.update_tile_list(world.tile_list)
 
                     game_over = player1.game_over(540, spike_group)
                     
@@ -157,16 +162,16 @@ def main():
                             world.build_world(tile_size, spike_group)
                             game_over = 0
                         else:
-                            screen.fill('#000000')
+                            screen.fill(black)
 
                     if level == 1:
-                         screen.blit(player_tooltip_1, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
+                        screen.blit(player_tooltip_1, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
                     elif level == 2:
-                         screen.blit(player_tooltip_2, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
+                        screen.blit(player_tooltip_2, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
                     elif level == 3:
-                         screen.blit(player_tooltip_3, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
+                        screen.blit(player_tooltip_3, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
                     elif level == 4:
-                         screen.blit(player_tooltip_4, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
+                        screen.blit(player_tooltip_4, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
 
                 elif player1.is_paused:
                     fifties_title_small.draw
@@ -206,14 +211,38 @@ def draw_everything(screen, player, enemies, pause):
     enemies.draw(screen)
     pause.draw(screen)
 
-def fifties_intro(screen, title, text):
-    titles = True
+def fifties_intro(screen, title, text, question, question_time, result):
     screen.fill('#000000')
-    title.draw(screen)
-    screen.blit(text, (85, 450))
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_SPACE]:
+    # shows title screen until space pressed
+    if not question_time[0]:
+        title.draw(screen)
+        screen.blit(text, (85, 450))
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            question_time[0] = True
+            time.sleep(0.1)
+
+    # when pressed, start quiz
+    elif result[0] is None:
+        drawn = question.draw(screen)
+        if drawn:
+            if question.check_answer(drawn, screen):
+                result[0] = "correct"
+            else:
+                result[0] = "incorrect"
+            result[1] = pygame.time.get_ticks()
+
+    # shows result for 2 seconds
+    elif pygame.time.get_ticks() - result[1] < 1000:
+        screen.fill('#000000')
+        if result[0] == "correct":
+            question.correct.draw(screen)
+        else:
+            question.incorrect.draw(screen)
+
+    # after result shown, returns True
+    else:
         return True
 
 
@@ -222,7 +251,7 @@ def pause_menu(screen, player, title, button1, font, button2, button3, text2, bu
     title.draw(screen)
 
     if button1 is not None and button1.draw(screen):
-            player.is_paused = False
+        player.is_paused = False
 
     text1 = font.render("Volume - "+ str(round(player.volume, 1)* 10), True, "White")
     screen.blit(text1, (386, 250))
@@ -259,7 +288,7 @@ def level_reset(level, player, spikes):
     if path.exists(f'Level Data/data_{level}'):
         pickle_in = open(f'Level Data/data_{level}', 'rb')
         data = pickle.load(pickle_in)
-    world = World(data, '#2E4D4C')
+    world = World(data)
 
     return world
 

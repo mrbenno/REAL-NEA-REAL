@@ -44,26 +44,57 @@ class Title:
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+        return True
 
-class Menu():
-    def __init__(self, bg_colour, player, title, button1, button2, button3):
-        self.player = player
-        self.title = title
-        self.button1 = button1
-        self.button2 = button2
-        self.button3 = button3
+class Quiz:
+    def __init__(self, question, width, height, choices, correct_answer):
+        self.question = question
+        self.question = pygame.transform.scale(self.question, (width, height))
+        self.rect = self.question.get_rect()
+        self.rect.x = 50
+        self.rect.y = 25
+
+        self.coords = [(110, 340), (410, 340), (110, 440), (410, 440)]
+
+        self.font =  pygame.font.Font("Fonts/Pixeltype.ttf", 50)
+        self.rendered_choices = []
+        for choice in choices:
+            self.rendered_choices.append(self.font.render(choice, True, '#FFFFFF'))
+
+        self.correct_answer = correct_answer
+        self.incorrect_counter = 0
+
+        self.options_icons = []
+        for i in range(1, 9):
+            self.options_icons.append(pygame.image.load(f"Assets/Options/Options-{i}.png"))
+
+        self.option_1 = Button(self.options_icons[0], self.options_icons[1], 50, 50, 50, 340)
+        self.option_2 = Button(self.options_icons[2], self.options_icons[3], 50, 50, 350, 340)
+        self.option_3 = Button(self.options_icons[4], self.options_icons[5], 50, 50, 50, 440)
+        self.option_4 = Button(self.options_icons[6], self.options_icons[7], 50, 50, 350, 440)
+
+
+        self.correct_label = pygame.image.load("Assets/Result-1.png")
+        self.correct = Title(self.correct_label, 570, 160, 360 - 285, 200)
+        self.incorrect_label = pygame.image.load("Assets/Result-2.png")
+        self.incorrect = Title(self.incorrect_label, 670, 160, 360 - 335, 200)
 
     def draw(self, screen):
-        screen.fill('#000000')
-        self.title.draw(screen)
-
-        if self.button1.draw(screen):
+        screen.blit(self.question, self.rect)
+        for i in range(4):
+            screen.blit(self.rendered_choices[i], self.coords[i])
+        if self.option_1.draw(screen):
             return 1
-
-        if self.button2.draw(screen):
+        elif self.option_2.draw(screen):
             return 2
-
-        if self.button3 is not None:
-            if self.button3.draw(screen):
-                return 3
-            
+        elif self.option_3.draw(screen):
+            return 3
+        elif self.option_4.draw(screen):
+            return 4
+    
+    def check_answer(self, draw, screen):
+        if draw == self.correct_answer:
+            return True
+        else:
+            self.incorrect_counter += 1
+            return False
