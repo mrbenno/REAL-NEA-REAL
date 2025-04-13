@@ -48,6 +48,7 @@ class Player:
         self.tile_list = []
         self.is_paused = is_paused
         self.volume = volume
+        self.end = False
 
     def update_tile_list(self, new):
         self.tile_list = new
