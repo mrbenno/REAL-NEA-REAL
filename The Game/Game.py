@@ -5,7 +5,7 @@ import pickle
 from os import path
 import time
 
-from Character import Player
+from Character import Player, Enemy
 from Enviroment import World
 from UI import Button, Title, Quiz
 
@@ -43,10 +43,21 @@ def main():
     sub_tog_on_down = pygame.image.load("Assets/SubtitleTglOnDown.png")
     quiz_title_icon = pygame.image.load("Assets/QuizTitle.png")
 
+    # loading and resizing intro slides
     slide1 = pygame.image.load("Assets/Slide1.png")
     slide1 = pygame.transform.scale(slide1, (720, 540))
     slide2 = pygame.image.load("Assets/Slide2.png")
     slide2 = pygame.transform.scale(slide2, (720, 540))
+
+    # storing the paths to voice line audio files
+    voice_line_paths = [f"Sounds/Voice Lines/VoiceLine-{i}.wav" for i in range(1, 6)]
+
+    # loading subtitle images and resizing them
+    subtitles = []
+    for i in range(1, 6):
+        subtitles.append(pygame.image.load(f"Assets/Subtitles/Subtitle-{i}.png"))
+    for i in range(len(subtitles)):
+        subtitles[i] = pygame.transform.scale(subtitles[i], (580, 100))
 
     # loading fonts
     pixelType_title = pygame.font.Font("Fonts/Pixeltype.ttf", 50)
@@ -56,37 +67,41 @@ def main():
     tile_size = 30 #needed for the world building system to work
     main_menu = True # allows the program to start on the main menu
     level = 1 # tells the program what level to start on
-    max_level = 5 # tells the program the highest level - allows for it to stop then
-    intro = [False]
+    max_level = 1 # tells the program the highest level - allows for it to stop then
+    intro = [False] # wrapped in list to allow modification in subroutines
     question = [False]
-    result = [None, 0]
-
+    result = [None, 0] # stores quiz result and timestamp
+    has_played = [False, False, False, False, False] # ensures voice lines only play once per level
+    current_voice_line = None
+    subtitles_enabled = True
 
     white = ('#FFFFFF')
     black = ('#000000')
-    
 
     # accessing the world files using the Pickle module
     if path.exists(f'Level Data/data_{level}'): # checks to see if a path exists for a select level
         pickle_in = open(f'Level Data/data_{level}', 'rb') # if true, file is opened and put into the pickle_in variable
         data = pickle.load(pickle_in) # the file's pickled contents are read and assigned to the data variable
     world = World(data) # the data variable is used to create an instance of the World class
- 
 
-    # creating instances of classes, creates the player etc
+    # creating player instance
     player1 = Player(pygame.Rect(60, dimensions[1] - 120, 25, 25), 5, False,
                      False, False, 8, 0.53)
-    
-    spike_group = pygame.sprite.Group()
+
+    spike_group = pygame.sprite.Group() # used for hazards like spikes
 
     # rendering text
     description_1 = pixelType_body.render("Press SPACE to continue.", True, white)
-    subtitles_label = pixelType_title.render("Subtitles", True, white)
-    
-    player_tooltip_1 = nimbus_bold.render("Press A and D to move left and right.", True, white)
-    player_tooltip_2 = nimbus_bold.render("Press W or SPACE to jump.", True, white)
-    player_tooltip_3 = nimbus_bold.render("Watch out for the RED LAVA.", True, white)
-    player_tooltip_4 = nimbus_bold.render("Watch out for the SPIKES too.", True, white)    
+    ending = pixelType_title.render("end", True, white)
+
+    # setting up helper tooltips for each level
+    tooltips = [
+        [nimbus_bold.render("Press A and D to move left and right.", True, white), 
+        nimbus_bold.render("Press ESC or the pause button for options.", True, white), 
+        nimbus_bold.render("Go to the BLUE to complete the level.", True, white)], # level 1
+        [nimbus_bold.render("Press W or SPACE to jump.", True, white)], # level 2
+        [nimbus_bold.render("Watch out for the RED LAVA.", True, white)], # level 3
+        [nimbus_bold.render("Watch out for the SPIKES too.", True, white)]] # level 4
 
     # more instances of classes, creates the menus and general user interface
     main_title = Title(main_title_icon, 500, 250, dimensions[0] // 2 - 250, 25)
@@ -95,7 +110,7 @@ def main():
     fifties_title_small = Title(fifties_title_icon, dimensions[0] // 2, dimensions[0] // 4, 0, 25)
     quiz_title = Title(quiz_title_icon, 320, 160, (dimensions[0] // 2) - 160, (dimensions[1] // 2) - 80)
 
-    pause_button = Button(pause_button_icon, pause_button_down_icon, 30, 30, dimensions[0] - 90, 45)
+    pause_button = Button(pause_button_icon, pause_button_down_icon, 30, 30, dimensions[0] - 75, 45)
     pause_title = Title(pause_title_image, 200, 100, (dimensions[0] // 2) + 25, 25)
     resume_button = Button(resume_button_icon, resume_button_down_icon, 160, 50, (dimensions[0] // 2) + 25, 150)
     volume_up_button = Button(vol_up_button_icon, vol_up_button_down_icon, 25,25, 610, 250)
@@ -106,10 +121,10 @@ def main():
     quit_button = Button(quit_button_icon, quit_button_down_icon, 100, 50, (dimensions[0] // 2) + 25, 450)
 
     question_icon = pygame.image.load("Assets/Question1.png")
-    choices = ("PARRY", "ELIZA", "ChatGPT", "Eugene Goostman")
+    choices = ("PARRY", "ELIZA", "ChatGPT", "Eugene Goostman") # quiz choices
     question_text = Quiz(question_icon, 480, 110, choices, 2)
 
-    timer = [0]
+    timer = [0] # for intro timing
 
     #main Pygame loop required to keep it running until the player closes the window
     run = True
@@ -138,31 +153,42 @@ def main():
                     player1.is_paused = True
 
                 if not player1.is_paused:
+                    # update game state while unpaused
                     player1.check_input()
                     player1.update()
-                    draw_everything(screen, player1, spike_group, pause_button)
-                    
+                    draw_everything(screen, player1, world, subtitles_enabled, subtitles, level, spike_group, pause_button)
+                      
                     for spike in spike_group:
                         spike.animate(delta_time)
 
-                    world.draw(screen)
-                    player1.update_tile_list(world.tile_list)
+                    # play level-specific voice line
+                    if level <= len(voice_line_paths) and has_played[level - 1] == False:
+                        current_voice_line = voice_line_paths[level - 1]
+                        if player1.volume > 0.04:
+                            pygame.mixer.music.load(voice_line_paths[level - 1])
+                            pygame.mixer.music.set_volume(player1.volume)
+                            pygame.mixer.music.play()
+                        has_played[level - 1] = True
+
+                    # show tooltips depending on level
+                    if level <= 4:
+                        for i, tooltip in enumerate(tooltips[level - 1]):
+                            screen.blit(tooltip, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15 - i * 25))
 
                     game_over = player1.game_over(540, spike_group)
-                    
+
                     if game_over == -1:
+                        # player has died
                         death_sfx = pygame.mixer.Sound("Sounds/Death.wav")
                         death_sfx.set_volume(player1.volume)
                         if player1.volume > 0.04:
                             death_sfx.play()
-                        # level = 1
-                        # data = []
-                        # world = level_reset(level, player1, spike_group)
-                        # world.build_world(tile_size, spike_group)
                         player1.rect.x, player1.rect.y = player1.spawn_point
                         player1.velocity = [0, 0]
                         game_over = 0
                     elif game_over == 1:
+                        # level completed
+                        pygame.mixer.music.pause()
                         level += 1
                         if level <= max_level:
                             data = []
@@ -170,34 +196,34 @@ def main():
                             world.build_world(tile_size, spike_group)
                             game_over = 0
                         else:
+                            # game completed
                             player1.speed = 0
                             player1.volume = 0
                             screen.fill(black)
-                            fifties_outro(screen, quiz_title, description_1, question_text, question, result, player1)
-
-                    if level == 1:
-                        screen.blit(player_tooltip_1, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
-                    elif level == 2:
-                        screen.blit(player_tooltip_2, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
-                    elif level == 3:
-                        screen.blit(player_tooltip_3, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
-                    elif level == 4:
-                        screen.blit(player_tooltip_4, (player1.rect.topright[0] + 5, player1.rect.topright[1] - 15))
+                            fifties_outro(screen, quiz_title, description_1, question_text, question, result, ending)
 
                 elif player1.is_paused == True:
-                    fifties_title_small.draw
-                    result = (pause_menu(screen, player1, pause_title, resume_button, pixelType_title, volume_up_button, volume_down_button, 
-                                        subtitles_label, subtitle_toggle_on, subtitle_toggle_off, restart_button, quit_button))
-                    if result == 6:
+                    pygame.mixer.music.pause()
+
+                    fifties_title_small.draw(screen)
+                    pause_result = (pause_menu(screen, player1, pause_title, resume_button, pixelType_title, volume_up_button, volume_down_button, 
+                                        restart_button, quit_button))
+                    if pause_result == 1:
+                        player1.is_paused = False
+                        pygame.mixer.music.unpause()
+                    
+                    elif pause_result == 4:
                             player1.is_paused = False
                             level = 1
                             data = []
                             world = level_reset(level, player1, spike_group)
                             world.build_world(tile_size, spike_group)
+                            has_played = [False, False, False, False, False]
                     
-                    elif result == 7:
+                    elif pause_result == 5:
                         run = False
 
+                # rare edge case where player pauses via keyboard and then clicks back to game
                 if player1.is_paused and not resume_button.draw:
                     pause_button.draw = False
                     player1.is_paused = False
@@ -211,36 +237,25 @@ def main():
     # pygame quits if run != True
     pygame.quit()
 
+
 # subroutine responsible for checking if the user has quit the application
 def handle_events():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
+            quit()
+
 
 # self-explaintory
-def draw_everything(screen, player, enemies, pause):
+def draw_everything(screen, player, world, subs, sub, level, enemies, pause):
     screen.fill('#0A141F')
+    world.draw(screen)
+    player.update_tile_list(world.tile_list)
+    if subs == True and level <= len(sub):
+        screen.blit(sub[level - 1], (15, 15))
     player.draw(screen)
     enemies.draw(screen)
     pause.draw(screen)
-
-
-def fade_in(screen, image, duration=1000):
-    fade_surface = pygame.Surface(screen.get_size()).convert()
-    fade_surface.fill('#000000')
-    
-    start_time = pygame.time.get_ticks()
-    alpha = 255
-
-    while alpha > 0:
-        elapsed = pygame.time.get_ticks() - start_time
-        alpha = max(0, 255 - int(255 * (elapsed / duration)))
-
-        screen.blit(image, (0, 0))
-        fade_surface.set_alpha(alpha)
-        screen.blit(fade_surface, (0, 0))
-        pygame.display.update()
-        pygame.time.delay(30)
 
 
 # what runs when the app begins (after the main menu)
@@ -257,16 +272,16 @@ def fifties_intro(screen, title, text, intro, timer, slide1, slide2):
             timer[0] = pygame.time.get_ticks()
             time.sleep(0.1)
 
-    elif pygame.time.get_ticks() - timer[0] < 5000:
+    elif pygame.time.get_ticks() - timer[0] < 600:
         screen.blit(slide1, (0, 0))
-    elif pygame.time.get_ticks() - timer[0] < 10000:
+    elif pygame.time.get_ticks() - timer[0] < 1000:
         screen.blit(slide2, (0, 0))
 
     else:
         return True
 
     
-def fifties_outro(screen, title, text, question, question_time, result):
+def fifties_outro(screen, title, text, question, question_time, result, ending):
     screen.fill('#000000')
 
     if not question_time[0]:
@@ -286,50 +301,50 @@ def fifties_outro(screen, title, text, question, question_time, result):
                 result[0] = "incorrect"
             result[1] = pygame.time.get_ticks()
 
-    elif pygame.time.get_ticks() - result[1] < 1000:
+    elif pygame.time.get_ticks() - result[1] < 5000:
         screen.fill('#000000')
         if result[0] == "correct":
             question.correct.draw(screen)
         else:
             question.incorrect.draw(screen)
 
+    elif pygame.time.get_ticks() - result[1] < 15000:
+        screen.blit(ending, (360, 270))
+
     else:
         return True
 
 
-def pause_menu(screen, player, title, button1, font, button2, button3, text2, button4, button5, button6, button7):
+# builds and displays the pause menu
+# also returns flags based on what button was clicked (resume, quit, etc)
+def pause_menu(screen, player, title, button1, font, button2, button3, button4, button5):
     pygame.draw.rect(screen, '#000000', pygame.Rect(360, 0, 360, 540))
     title.draw(screen)
 
     if button1 is not None and button1.draw(screen):
-        player.is_paused = False
+        return 1
 
     text1 = font.render("Volume - "+ str(round(player.volume, 1)* 10), True, "White")
     screen.blit(text1, (386, 250))
-    screen.blit(text2, (386, 300))
-    
 
     if button2 is not None and button2.draw(screen):
             if not player.volume > 1.0:
                 player.volume += 0.1
+                pygame.mixer.music.set_volume(player.volume)
 
     if button3 is not None and button3.draw(screen):
             if not player.volume < 0.1:
                 player.volume -= 0.1
-
-    if button4 is not None and button4.draw(screen):
-            return 4
+                pygame.mixer.music.set_volume(player.volume)
         
-    if button5 is not None and button5.draw(screen): 
-            return 5
+    if button4 is not None and button4.draw(screen): # restart game
+        return 4
         
-    if button6 is not None and button6.draw(screen):
-            return 6
-    
-    if button7 is not None and button7.draw(screen):
-            return 7
+    if button5 is not None and button5.draw(screen): # quit game
+        return 5
 
 
+# resets a level by repositioning player, clearing spikes and loading new world data
 def level_reset(level, player, spikes):
     player.rect.x, player.rect.y = player.spawn_point
     player.velocity = [0, 0]
