@@ -37,6 +37,7 @@ class Button:
 
         return action
 
+
 # title class for menus or screens
 class Title:
     def __init__(self, image, width, height, x, y):
@@ -50,10 +51,11 @@ class Title:
         screen.blit(self.image, self.rect)
         return True
 
+
 # quiz class handles question logic and options
 class Quiz:
     def __init__(self, question, width, height, choices, correct_answer):
-        # scale question image
+        # scale question image and set position
         self.question = question
         self.question = pygame.transform.scale(self.question, (width, height))
         self.rect = self.question.get_rect()

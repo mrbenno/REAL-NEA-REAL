@@ -67,12 +67,11 @@ def main():
     tile_size = 30 #needed for the world building system to work
     main_menu = True # allows the program to start on the main menu
     level = 1 # tells the program what level to start on
-    max_level = 1 # tells the program the highest level - allows for it to stop then
+    max_level = 5 # tells the program the highest level - allows for it to stop then
     intro = [False] # wrapped in list to allow modification in subroutines
     question = [False]
     result = [None, 0] # stores quiz result and timestamp
     has_played = [False, False, False, False, False] # ensures voice lines only play once per level
-    current_voice_line = None
     subtitles_enabled = True
 
     white = ('#FFFFFF')
@@ -272,9 +271,9 @@ def fifties_intro(screen, title, text, intro, timer, slide1, slide2):
             timer[0] = pygame.time.get_ticks()
             time.sleep(0.1)
 
-    elif pygame.time.get_ticks() - timer[0] < 600:
+    elif pygame.time.get_ticks() - timer[0] < 6000:
         screen.blit(slide1, (0, 0))
-    elif pygame.time.get_ticks() - timer[0] < 1000:
+    elif pygame.time.get_ticks() - timer[0] < 10000:
         screen.blit(slide2, (0, 0))
 
     else:
