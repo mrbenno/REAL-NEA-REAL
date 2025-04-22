@@ -1,6 +1,5 @@
 #importing nessacary modules
 import pygame
-from pygame.examples.music_drop_fade import volume
 import pickle
 from os import path
 import time
@@ -11,6 +10,7 @@ from UI import Button, Title, Quiz
 
 # defining the main function, contains most variables and instances of objects
 def main():
+    global intro_scene
     pygame.init() #initialises Pygame
 
     #creating a window, getting it's dimensions, and defining frame as the instance of Pygame's Clock class
@@ -73,6 +73,8 @@ def main():
     result = [None, 0] # stores quiz result and timestamp
     has_played = [False, False, False, False, False] # ensures voice lines only play once per level
     subtitles_enabled = True
+    timer = [0]  # for intro timing
+    delta_time = 0
 
     white = ('#FFFFFF')
     black = ('#000000')
@@ -83,11 +85,14 @@ def main():
         data = pickle.load(pickle_in) # the file's pickled contents are read and assigned to the data variable
     world = World(data) # the data variable is used to create an instance of the World class
 
+    spike_group = pygame.sprite.Group()  # used for hazards like spikes
+
+    world.build_world(tile_size, spike_group)
+
     # creating player instance
     player1 = Player(pygame.Rect(60, dimensions[1] - 120, 25, 25), 5, False,
                      False, False, 8, 0.53)
 
-    spike_group = pygame.sprite.Group() # used for hazards like spikes
 
     # rendering text
     description_1 = pixelType_body.render("Press SPACE to continue.", True, white)
@@ -95,8 +100,8 @@ def main():
 
     # setting up helper tooltips for each level
     tooltips = [
-        [nimbus_bold.render("Press A and D to move left and right.", True, white), 
-        nimbus_bold.render("Press ESC or the pause button for options.", True, white), 
+        [nimbus_bold.render("Press A and D to move left and right.", True, white),
+        nimbus_bold.render("Press ESC or the pause button for options.", True, white),
         nimbus_bold.render("Go to the BLUE to complete the level.", True, white)], # level 1
         [nimbus_bold.render("Press W or SPACE to jump.", True, white)], # level 2
         [nimbus_bold.render("Watch out for the RED LAVA.", True, white)], # level 3
@@ -123,46 +128,42 @@ def main():
     choices = ("PARRY", "ELIZA", "ChatGPT", "Eugene Goostman") # quiz choices
     question_text = Quiz(question_icon, 480, 110, choices, 2)
 
-    timer = [0] # for intro timing
 
     #main Pygame loop required to keep it running until the player closes the window
     run = True
-    delta_time = 0
-    world.build_world(tile_size, spike_group)
-    while run ==  True:
+    while run:
         start = time.time()
-        
+
         frame.tick(60)
         handle_events()
 
-        if main_menu == True: # creates main menu (title, button)
+        if main_menu: # creates main menu (title, button)
              main_title.draw(screen)
              if play_button.draw(screen): # if player clicks 'play':
                   main_menu = False
                   intro_scene = True
-                  
+
         else: # once main menu set to false, actual game begins
-            if intro_scene == True:
+            if intro_scene:
                 output = fifties_intro(screen, fifties_title, description_1, intro, timer, slide1, slide2)
-                if output == True:
+                if output:
                     intro_scene = False
-            
-            if intro_scene == False:
+
+            if not intro_scene:
                 if pause_button.draw(screen):
                     player1.is_paused = True
 
                 if not player1.is_paused:
-                    # update game state while unpaused
+                    # update game state while not paused
                     player1.check_input()
                     player1.update()
                     draw_everything(screen, player1, world, subtitles_enabled, subtitles, level, spike_group, pause_button)
-                      
+
                     for spike in spike_group:
                         spike.animate(delta_time)
 
                     # play level-specific voice line
                     if level <= len(voice_line_paths) and has_played[level - 1] == False:
-                        current_voice_line = voice_line_paths[level - 1]
                         if player1.volume > 0.04:
                             pygame.mixer.music.load(voice_line_paths[level - 1])
                             pygame.mixer.music.set_volume(player1.volume)
@@ -205,12 +206,12 @@ def main():
                     pygame.mixer.music.pause()
 
                     fifties_title_small.draw(screen)
-                    pause_result = (pause_menu(screen, player1, pause_title, resume_button, pixelType_title, volume_up_button, volume_down_button, 
+                    pause_result = (pause_menu(screen, player1, pause_title, resume_button, pixelType_title, volume_up_button, volume_down_button,
                                         restart_button, quit_button))
                     if pause_result == 1:
                         player1.is_paused = False
                         pygame.mixer.music.unpause()
-                    
+
                     elif pause_result == 4:
                             player1.is_paused = False
                             level = 1
@@ -218,7 +219,7 @@ def main():
                             world = level_reset(level, player1, spike_group)
                             world.build_world(tile_size, spike_group)
                             has_played = [False, False, False, False, False]
-                    
+
                     elif pause_result == 5:
                         run = False
 
@@ -230,7 +231,7 @@ def main():
         pygame.display.flip()  # note: display.flip updates entire screen, display.update updates what's in brackets
 
         # resetting the animation time etc
-        end = time.time()        
+        end = time.time()
         delta_time = end - start
 
     # pygame quits if run != True
@@ -271,15 +272,15 @@ def fifties_intro(screen, title, text, intro, timer, slide1, slide2):
             timer[0] = pygame.time.get_ticks()
             time.sleep(0.1)
 
-    elif pygame.time.get_ticks() - timer[0] < 6000:
+    elif pygame.time.get_ticks() - timer[0] < 25000:
         screen.blit(slide1, (0, 0))
-    elif pygame.time.get_ticks() - timer[0] < 10000:
+    elif pygame.time.get_ticks() - timer[0] < 35000:
         screen.blit(slide2, (0, 0))
 
     else:
         return True
 
-    
+
 def fifties_outro(screen, title, text, question, question_time, result, ending):
     screen.fill('#000000')
 
@@ -335,10 +336,10 @@ def pause_menu(screen, player, title, button1, font, button2, button3, button4, 
             if not player.volume < 0.1:
                 player.volume -= 0.1
                 pygame.mixer.music.set_volume(player.volume)
-        
+
     if button4 is not None and button4.draw(screen): # restart game
         return 4
-        
+
     if button5 is not None and button5.draw(screen): # quit game
         return 5
 

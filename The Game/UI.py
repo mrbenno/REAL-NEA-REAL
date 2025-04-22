@@ -4,11 +4,9 @@ import pygame
 class Button:
     def __init__(self, image, image2, width, height, x, y):
         # default and hover image setup
-        self.image = image
-        self.image = pygame.transform.scale(self.image, (width, height))
 
-        self.image2 = image2
-        self.image2 = pygame.transform.scale(self.image2, (width, height))
+        self.image = pygame.transform.scale(image, (width, height))
+        self.image2 = pygame.transform.scale(image2, (width, height))
 
         # set position and size
         self.rect = self.image2.get_rect()
@@ -56,8 +54,7 @@ class Title:
 class Quiz:
     def __init__(self, question, width, height, choices, correct_answer):
         # scale question image and set position
-        self.question = question
-        self.question = pygame.transform.scale(self.question, (width, height))
+        self.question = pygame.transform.scale(question, (width, height))
         self.rect = self.question.get_rect()
         self.rect.x = 50
         self.rect.y = 25
